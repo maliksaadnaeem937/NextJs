@@ -4,7 +4,8 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import ResendCodeButton from "./ResendCodeButton";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://next-js-one-ivory.vercel.app/api";
 export default function VerifyOtp() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
