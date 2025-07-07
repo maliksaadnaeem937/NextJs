@@ -8,7 +8,7 @@ const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token =  cookieStore.get("accessToken")?.value;
+    const token = cookieStore.get("accessToken")?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -27,7 +27,7 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ user }, { status: 200 });
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
     console.error("Error fetching profile:", error);
     return NextResponse.json(

@@ -1,34 +1,21 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import axios from "@lib/axios";
-import LogoutButton from "@components/LogoutButton";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import Loading from "src/app/loading";
-import { asyncHandler } from "@lib/asyncHandler";
+import LogoutButton from "@components/LogoutButton";
+import { fetchData } from "@lib/fetchData";
+import ErrorMessage from "./ErrorMessage";
 
 export default function ProfilePage() {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["profile", "get", "/protected/profile"],
+    queryFn: fetchData,
+    retry: false,
+  });
 
-  useEffect(() => {
-    async function fetchProfile() {
-      const [err, res] = await asyncHandler(axios.get("/protected/profile"));
-
-      if (res) {
-        setProfile(res.data?.user);
-      }
-      setLoading(false);
-    }
-
-    fetchProfile();
-  }, []);
-
-  if (loading) return <Loading />;
-
-  if (!profile) {
-    // No profile and not loading means request failed but interceptor redirected
-    // So you can return null or a message if you want (won't show long)
-    return null;
+  if (isLoading) return <Loading />;
+  if (error) {
+    return <ErrorMessage message={error?.response?.data?.error}></ErrorMessage>;
   }
 
   return (
@@ -39,8 +26,8 @@ export default function ProfilePage() {
         <div className="mt-6">
           <p className="text-gray-800 font-semibold">User Details:</p>
           <ul className="list-disc list-inside text-gray-700">
-            <li>Name: {profile.name}</li>
-            <li>Email: {profile.email}</li>
+            <li>Name: {data.name}</li>
+            <li>Email: {data.email}</li>
           </ul>
           <div className="text-center mt-4">
             <LogoutButton />
