@@ -4,8 +4,9 @@ import ProfilePage from "@components/ProfilePage";
 export const dynamic = "force-dynamic";
 
 export default async function page() {
-
-  
-
-  return <ProfilePage />;
+  const user = await getAuthenticatedUser();
+  if(user){
+    return <ProfilePage user={user} />;
+  }
+  return <ProfilePage user={null} />;
 }

@@ -6,7 +6,7 @@ export default async function page() {
   const user = await getAuthenticatedUser();
   console.log("Authenticated User:", user);
   if (user) {
-    redirect("/profile");
+    return redirect("/profile");
   }
   return <SignupPage />;
 }
