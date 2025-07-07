@@ -1,28 +1,30 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@lib/axios";
+import { asyncHandler } from "@lib/asyncHandler";
 import toast from "react-hot-toast";
-const API_URL = process.env.NEXT_PUBLIC_API_URL||"https://next-js-one-ivory.vercel.app/api";
+const API_URL =process.env.NEXT_PUBLIC_API_URL || "https://next-js-one-ivory.vercel.app/api";
 export default function LogoutButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
     setLoading(true);
-    try {
-      await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true });
-      toast.success("Logged out successfully");
+    const toastId = toast.loading("Logging out...");
+
+    const [error, res] = await asyncHandler(axios.post("/auth/logout"));
+
+    if (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Try again.", { id: toastId });
+    } else {
+      toast.success("Logged out successfully", { id: toastId });
       setTimeout(() => {
         router.push("/login");
       }, 1000);
-    } catch (err) {
-      console.error("Logout error:", err);
-      toast.error("Logout failed. Try again.");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

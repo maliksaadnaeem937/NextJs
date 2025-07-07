@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
+import axios from "@lib/axios";
+import { asyncHandler } from "@lib/asyncHandler";
 import toast from "react-hot-toast";
 const API_URL = process.env.NEXT_PUBLIC_API_URL||"https://next-js-one-ivory.vercel.app/api";
 export default function SignupPage() {
@@ -41,50 +42,43 @@ export default function SignupPage() {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    const toastId = toast.loading("Signing up...");
-    try {
-      setLoading(true);
-      const res = await axios.post(`${API_URL}/auth/register`, formData, {
-        withCredentials: true,
-      });
-      if (res.status === 201) {
-        toast.success(res.data?.message || "Signup successful! ✅");
-        // Optionally redirect to login or home page
-        setTimeout(() => {
-          window.location.href = "/verify-otp"; // Redirect to login page after signup
-        }, 2000);
-      } else {
-        toast.error(res.data?.error || "Signup failed. Try again.");
-      }
-    } catch (error) {
-      if (error.response) {
-        // Server responded with a status other than 2xx
-        toast.error(
-          error?.response?.data?.error || "Signup failed. Try again."
-        );
-      } else if (error.request) {
-        // Request was made but no response received
-        toast.error("No response from server. Please try again later.");
-      } else {
-        // Something else happened while setting up the request
-        toast.error("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-      toast.dismiss(toastId);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
-      // Reset form data after submission
-      e.target.reset();
-     
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  setLoading(true);
+  const toastId = toast.loading("Signing up...");
+
+  const [error, res] = await asyncHandler(
+    axios.post(`${API_URL}/auth/register`, formData, {
+      withCredentials: true,
+    })
+  );
+
+  toast.dismiss(toastId);
+
+  if (error) {
+    if (error.response) {
+      toast.error(error.response.data?.error || "Signup failed. Try again.");
+    } else if (error.request) {
+      toast.error("No response from server. Please try again later.");
+    } else {
+      toast.error("An unexpected error occurred. Please try again.");
     }
-  };
+  } else if (res?.status === 201) {
+    toast.success(res.data?.message || "Signup successful! ✅");
+    setTimeout(() => {
+      window.location.href = "/verify-otp";
+    }, 2000);
+  } else {
+    toast.error("Signup failed. Try again.");
+  }
+
+  setLoading(false);
+  setFormData({ name: "", email: "", password: "" });
+  e.target.reset();
+};
+
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">

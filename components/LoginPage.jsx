@@ -1,36 +1,28 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import toast from "react-hot-toast";
-const API_URL = process.env.NEXT_PUBLIC_API_URL||"https://next-js-one-ivory.vercel.app/api";
-// LoginPage component for user login
-// This component handles user login functionality, including form submission and validation.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://next-js-one-ivory.vercel.app/api";
+import { asyncHandler } from "@lib/asyncHandler";
+import axios from "@lib/axios";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-     const validateForm = () => {
-        const {email, password } = formData;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const passRegex =
-          /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  
-        if (!emailRegex.test(email)) {
-          toast.error("Invalid email format");
-          return false;
-        }
-        if (!passRegex.test(password)) {
-          toast.error(
-            "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character"
-          );
-          return false;
-        }
-    
-        return true;
-      };
-  
+  const validateForm = () => {
+    const { email, password } = formData;
+    const passRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passRegex.test(password)) {
+      toast.error(
+        "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character"
+      );
+      return false;
+    }
+    return true;
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,14 +30,26 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!validateForm())return;
+    if (!validateForm()) return;
     setLoading(true);
     const toastId = toast.loading("Logging in...");
-    try {
-      const res = await axios.post(`${API_URL}/auth/login`, formData, {
-        withCredentials: true,
-      });
+    const [error, res] = await asyncHandler(
+      axios.post("/auth/login", formData)
+    );
 
+    if (error) {
+      if (error.response) {
+        toast.error(error.response.data?.error || "Login failed.", {
+          id: toastId,
+        });
+      } else if (error.request) {
+        toast.error("No response from server. Try again later.", {
+          id: toastId,
+        });
+      } else {
+        toast.error("Unexpected error occurred.", { id: toastId });
+      }
+    } else {
       if (res.status === 200) {
         toast.success(res.data?.message || "Login successful! ✅", {
           id: toastId,
@@ -58,28 +62,10 @@ export default function LoginPage() {
           id: toastId,
         });
       }
-    } catch (error) {
-      console.error("Login error:", error);
-
-      if (error.response) {
-        toast.error(error?.response?.data?.error || "Login failed.", {
-          id: toastId,
-        });
-      } else if (error.request) {
-        toast.error("No response from server. Try again later.", {
-          id: toastId,
-        });
-      } else {
-        toast.error("Unexpected error occurred.", { id: toastId });
-      }
-    } finally {
-      setLoading(false);
-      setFormData({ email: "", password: "" });
-      // Reset form data after submission
-      e.target.reset();
-      // Reset the form fields
-
     }
+    setLoading(false);
+    setFormData({ email: "", password: "" });
+    e.target.reset();
   };
 
   return (

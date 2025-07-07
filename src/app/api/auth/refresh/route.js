@@ -10,10 +10,12 @@ const ACCESS_MAX_AGE = Number(process.env.ACCESS_TOKEN_MAX_AGE) || 900;
 
 export async function POST() {
   try {
-    const cookieStore = cookies();
-    const refreshToken = cookieStore.get('refreshToken')?.value;
+    const cookieStore = await cookies();
+    const refreshToken =  cookieStore.get('refreshToken')?.value;
+    console.log("refresh route called");
 
     if (!refreshToken) {
+      console.log("no refresh token found");  
       return NextResponse.json({ error: 'No refresh token provided' }, { status: 401 });
     }
 

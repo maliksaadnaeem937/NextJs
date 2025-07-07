@@ -3,6 +3,7 @@ import { serialize } from "cookie";
 
 export async function POST() {
   try {
+    console.log("logout route called");
     // Clear both access and refresh token cookies
     const clearAccessCookie = serialize("accessToken", "", {
       httpOnly: true,

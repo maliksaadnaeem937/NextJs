@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import ResendCodeButton from "./ResendCodeButton";
+import axios from  "@lib/axios";
+import { asyncHandler } from "@lib/asyncHandler";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://next-js-one-ivory.vercel.app/api";
@@ -23,52 +24,37 @@ export default function VerifyOtp() {
     return true;
   };
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+const handleVerify = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    try {
-      setLoading(true);
+  setLoading(true);
+  const toastId = toast.loading("Verifying...");
 
-      const res = await axios.post(
-        `${API_URL}/auth/verify`,
-        { email, code },
-        { withCredentials: true }
-      );
+  const [error, res] = await asyncHandler(
+    axios.post("/auth/verify", { email, code })
+  );
 
-      if (res.status === 200) {
-        toast.success(
-          res.data?.message || "Signup successful! Login to Continue ✅"
-        );
-        setTimeout(() => {
-          window.location.href = "/profile";
-        }, 2000);
-      } else {
-        toast.error(res.data?.error || "Verification failed. Try again.");
-      }
-
-      // Optionally redirect user here
-    } catch (error) {
-      console.log("Verification error:", error);
-      if (error.response) {
-        // Server responded with a status other than 2xx
-        toast.error(
-          error?.response?.data?.error || "Verification failed. Try again."
-        );
-      } else if (error.request) {
-        // Request was made but no response received
-        toast.error("No response from server. Please try again later.");
-      } else {
-        // Something else happened while setting up the request
-        toast.error("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-      setEmail("");
-      setCode("");
-      e.target.reset();
+  if (error) {
+    if (error.response) {
+      toast.error(error.response.data?.error || "Verification failed.", { id: toastId });
+    } else if (error.request) {
+      toast.error("No response from server. Try again later.", { id: toastId });
+    } else {
+      toast.error("Unexpected error occurred. Try again.", { id: toastId });
     }
-  };
+  } else {
+    toast.success(res.data?.message || "Signup successful! ✅", { id: toastId });
+    setTimeout(() => {
+      window.location.href = "/profile";
+    }, 2000);
+  }
+
+  setLoading(false);
+  setEmail("");
+  setCode("");
+  e.target.reset();
+};
 
   return (
     <div className="max-w-md mx-auto mt-12 bg-white rounded-2xl shadow-md p-8">
