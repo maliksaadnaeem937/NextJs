@@ -10,3 +10,7 @@ export default async function page() {
   }
   return <ProfilePage user={null} />;
 }
+export const metadata = {
+  title: "Profile",
+  description: "View and manage your profile information",
+};

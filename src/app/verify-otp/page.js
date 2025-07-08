@@ -1,13 +1,16 @@
 import React from "react";
 import VerifyOtp from "@components/VerifyotpPage";
-import { getAuthenticatedUser } from "@lib/auth";
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
+import { anyValidToken } from "@lib/auth";
 export const dynamic = "force-dynamic";
 export default async function page() {
-  const user = await getAuthenticatedUser();
-  console.log("Authenticated User:", user);
-  if (user) {
-     return redirect("/profile");
+  if (await anyValidToken()) {
+    return redirect("/profile");
   }
   return <VerifyOtp />;
 }
+
+export const metadata = {
+  title: "Verify OTP",
+  description: "Verify your OTP to access your account",
+};

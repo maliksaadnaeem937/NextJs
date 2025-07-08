@@ -24,7 +24,7 @@ export default function ProfilePage({ user }) {
     if (isLoading) return <Loading />;
     if (error) {
       return (
-        <ErrorMessage message={error?.response?.data?.error}></ErrorMessage>
+        <ErrorMessage message={"Session Expired Login Again!"}></ErrorMessage>
       );
     } else {
       return <ProfilePageUI user={user} />;

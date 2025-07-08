@@ -1,12 +1,15 @@
 import SignupPage from "@components/SignupPage";
-import { getAuthenticatedUser } from "@lib/auth";
 import { redirect } from "next/navigation";
+import { anyValidToken } from "@lib/auth";
 export const dynamic = "force-dynamic";
 export default async function page() {
-  const user = await getAuthenticatedUser();
-  console.log("Authenticated User:", user);
-  if (user) {
+  if (await anyValidToken()) {
     return redirect("/profile");
   }
   return <SignupPage />;
 }
+
+export const metadata = {
+  title: "Signup",
+  description: "Create a new account",
+};
