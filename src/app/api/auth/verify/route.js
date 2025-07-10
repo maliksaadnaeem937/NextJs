@@ -58,8 +58,17 @@ export async function POST(req) {
     user.isVerified = true;
     user.verificationCode = undefined;
     user.verificationCodeExpires = undefined;
-    user.lastVerificationCodeSentAt = undefined; // Reset last sent time
-    await user.save();
+    user.lastVerificationCodeSentAt = undefined;
+
+    try {
+      await user.save();
+    } catch (err) {
+      console.error("Failed to save user verification update:", err);
+      return NextResponse.json(
+        { error: "Failed to update verification status Please  re-verify" },
+        { status: 500 }
+      );
+    }
 
     const payload = {
       id: user._id.toString(),
