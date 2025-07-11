@@ -11,6 +11,7 @@ export async function GET(req) {
 
   const query = {
     isVerified: true,
+    email: { $ne: "zoyayasir58@gmail.com" }, // 👈 Exclude this email
     $or: [
       { name: new RegExp(q, "i") },
       { bio: new RegExp(q, "i") },
