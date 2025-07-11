@@ -5,10 +5,17 @@ import EditableField from "./EditableField";
 import LogoutButton from "./LogoutButton";
 import { updateProfile } from "@lib/handleProfileUpdate";
 import { profileImageUrl } from "@lib/globalVariables";
+import SearchUsers from "./SearchUsers";
 
-export default function ProfilePageUI({ user }) {
+export default function ProfilePageUI({ user, editable }) {
   const router = useRouter();
   const [bio, setBio] = useState(user?.bio || "No Bio Yet!");
+  const [techStack, setTechStack] = useState(
+    Array.isArray(user?.techStack) && user.techStack.length > 0
+      ? user.techStack.join(", ")
+      : "Nothing Added Yet!"
+  );
+
   const [profileImage, setProfileImage] = useState(
     user?.profilePic || profileImageUrl
   );
@@ -17,6 +24,18 @@ export default function ProfilePageUI({ user }) {
     const success = await updateProfile({ bio: newBio });
     if (success) {
       setBio(newBio);
+      router.refresh();
+    }
+  };
+
+  const handleTechStackUpdate = async (newTechStack) => {
+    const techStackArray = newTechStack
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    const success = await updateProfile({ techStack: techStackArray });
+    if (success) {
+      setTechStack(newTechStack);
       router.refresh();
     }
   };
@@ -44,6 +63,7 @@ export default function ProfilePageUI({ user }) {
         <ProfileImageUploader
           currentImage={profileImage || profileImageUrl}
           onUpload={handleImageUpload}
+          editable={editable}
         />
 
         {/* Profile Info */}
@@ -53,26 +73,57 @@ export default function ProfilePageUI({ user }) {
             {user?.name || "Anonymous User"}
           </h2>
 
-          {/* Bio Section */}
-          <div className="mb-6">
-            <EditableField label="Bio" value={bio} onSave={handleBioUpdate} />
+          <div className="mt-2 inline-flex items-center gap-2 text-sm">
+            {user?.isVerified ? (
+              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
+                ✅ Verified Account
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full font-medium">
+                ❌ Not Verified
+              </span>
+            )}
           </div>
 
-          {/* Additional Info (Optional Add-ons) */}
-          {/* <div className="mb-4">
-            <EditableField label="Role" value={user?.role || ""} onSave={handleRoleUpdate} />
-          </div> */}
+          {/* Bio */}
+          <div className="mb-6">
+            <EditableField
+              label="Bio"
+              value={bio}
+              onSave={handleBioUpdate}
+              editable={editable}
+            />
+          </div>
+
+          {/* Tech Stack */}
+          <div className="mb-6">
+            <EditableField
+              label="Tech Stack"
+              value={techStack}
+              onSave={handleTechStackUpdate}
+              editable={editable}
+            />
+          </div>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="my-6 border-t border-gray-200" />
+      <div className="my-6 border-t border-gray-200 border-2" />
 
-      {/* Footer Actions */}
-      <div className="flex justify-center sm:justify-end">
-        <LogoutButton />
-      </div>
+      {/* Conditionally render SearchUsers & LogoutButton */}
+      {editable && (
+        <>
+          <div className="flex justify-center sm:justify-end">
+            <SearchUsers />
+          </div>
+
+          <div className="my-6 border-t border-gray-200" />
+
+          <div className="flex justify-center sm:justify-end">
+            <LogoutButton />
+          </div>
+        </>
+      )}
     </div>
   );
 }
-

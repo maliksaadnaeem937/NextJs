@@ -3,7 +3,11 @@ import { useState, useRef } from "react";
 import { Pencil, UploadCloud, X } from "lucide-react";
 import { profileImageUrl } from "@lib/globalVariables";
 
-export default function ProfileImageUploader({ currentImage, onUpload }) {
+export default function ProfileImageUploader({
+  currentImage,
+  onUpload,
+  editable = true,
+}) {
   const [editing, setEditing] = useState(false);
   const [preview, setPreview] = useState(null);
   const [file, setFile] = useState(null);
@@ -42,8 +46,8 @@ export default function ProfileImageUploader({ currentImage, onUpload }) {
           className="w-36 h-36 sm:w-40 sm:h-40 rounded-full object-cover border-[4px] border-blue-500 shadow-lg mx-auto"
         />
 
-        {/* Edit Button */}
-        {!editing && (
+        {/* Edit Button only if editable */}
+        {editable && !editing && (
           <button
             onClick={() => setEditing(true)}
             className="absolute bottom-2 right-2 bg-white p-1.5 rounded-full shadow-md hover:bg-gray-100 transition"
@@ -55,7 +59,7 @@ export default function ProfileImageUploader({ currentImage, onUpload }) {
       </div>
 
       {/* Upload Controls */}
-      {editing && (
+      {editable && editing && (
         <div className="mt-4 flex flex-col items-center gap-3">
           <input
             type="file"

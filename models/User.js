@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+userSchema.index({
+  name: "text",
+  bio: "text",
+  techStack: "text",
+});
 // Prevent model overwrite error in Next.js hot reload
 export default mongoose.models.User || mongoose.model("User", userSchema);

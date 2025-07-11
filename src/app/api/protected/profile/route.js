@@ -7,7 +7,6 @@ import { connectDB } from "@lib/mongodb";
 import { JWT_ACCESS_SECRET } from "@lib/globalVariables";
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
-
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -30,10 +29,9 @@ export async function GET() {
       );
     }
     await connectDB();
-    const savedUser = await User.findById(user.id).select(
-      "-email -password -createdAt -updatedAt -__v -isVerified"
-    );
-    console.log(savedUser);
+    const savedUser = await User.findById(user.id)
+      .select("name bio techStack profilePic isVerified _id")
+      .lean();
 
     return NextResponse.json({ ...savedUser }, { status: 200 });
   } catch (error) {
@@ -47,10 +45,11 @@ export async function GET() {
 
 export async function PATCH(req) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("accessToken")?.value;
 
     if (!token) {
+      console.log("token not present");
       return NextResponse.json(
         { error: "Unauthorized: No token" },
         { status: 401 }

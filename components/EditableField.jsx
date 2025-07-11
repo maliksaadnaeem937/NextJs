@@ -2,7 +2,12 @@
 import { useState } from "react";
 import { Pencil, X, Check } from "lucide-react";
 
-export default function EditableField({ label, value, onSave }) {
+export default function EditableField({
+  label,
+  value,
+  onSave,
+  editable = true,
+}) {
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value || "");
 
@@ -22,7 +27,9 @@ export default function EditableField({ label, value, onSave }) {
         <p className="text-xs font-medium text-gray-500 tracking-wide uppercase">
           {label}
         </p>
-        {!editing && (
+
+        {/* ✏️ Only show edit button if editable */}
+        {!editing && editable && (
           <button
             onClick={() => setEditing(true)}
             className="text-gray-400 hover:text-blue-600 transition"
@@ -33,6 +40,7 @@ export default function EditableField({ label, value, onSave }) {
         )}
       </div>
 
+      {/* 🧾 Show input when editing */}
       {editing ? (
         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 mt-2 w-full">
           <input

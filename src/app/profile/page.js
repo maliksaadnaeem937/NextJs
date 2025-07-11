@@ -4,7 +4,9 @@ import ProfilePage from "@components/ProfilePage";
 export const dynamic = "force-dynamic";
 
 export default async function page() {
-  return <ProfilePage />;
+  return (
+    <ProfilePage key={"profile"} method={"get"} path={"/protected/profile"} editable={true} />
+  );
 }
 export const metadata = {
   title: "Profile",

@@ -5,14 +5,14 @@ import Loading from "src/app/loading";
 import { fetchData } from "@lib/fetchData";
 import ErrorMessage from "./ErrorMessage";
 import ProfilePageUI from "./ProfilePageUI";
-
-export default function ProfilePage() {
+export default function ProfilePage({ key, method, path, editable }) {
+  console.log("hi");
   const {
     data: user,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ["profile", "get", "/protected/profile"],
+    queryKey: [key, method, path],
     queryFn: fetchData,
     retry: false,
   });
@@ -21,10 +21,11 @@ export default function ProfilePage() {
   if (error) {
     return (
       <ErrorMessage
-        message={error.message || "Session Expired Login Again!"}
+        message={error?.response?.data?.error || "Session Expired Login Again!"}
       ></ErrorMessage>
     );
   } else {
-    return <ProfilePageUI user={user._doc} />;
+    console.log("inside profile page", user);
+    return <ProfilePageUI user={user} editable={editable} />;
   }
 }
