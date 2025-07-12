@@ -53,7 +53,7 @@ export async function PUT(req) {
       post.likes.push(userId);
     }
 
-    await post.save();
+    await post.save({ timestamps: false });
 
     return NextResponse.json(
       {
