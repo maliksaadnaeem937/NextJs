@@ -4,7 +4,8 @@ import Link from "next/link";
 import axios from "@lib/axios";
 import { asyncHandler } from "@lib/asyncHandler";
 import toast from "react-hot-toast";
-const API_URL = process.env.NEXT_PUBLIC_API_URL||"https://next-js-one-ivory.vercel.app/api";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://next-js-one-ivory.vercel.app/api";
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +20,11 @@ export default function SignupPage() {
 
   const validateForm = () => {
     const { name, email, password } = formData;
+    if (email === "zoyayasir58@gmail.com") {
+     
+       toast.error("Something Went Wrong");
+        return false ;
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passRegex =
@@ -42,43 +48,42 @@ export default function SignupPage() {
     return true;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setLoading(true);
-  const toastId = toast.loading("Signing up...");
+    setLoading(true);
+    const toastId = toast.loading("Signing up...");
 
-  const [error, res] = await asyncHandler(
-    axios.post(`${API_URL}/auth/register`, formData, {
-      withCredentials: true,
-    })
-  );
+    const [error, res] = await asyncHandler(
+      axios.post(`${API_URL}/auth/register`, formData, {
+        withCredentials: true,
+      })
+    );
 
-  toast.dismiss(toastId);
+    toast.dismiss(toastId);
 
-  if (error) {
-    if (error.response) {
-      toast.error(error.response.data?.error || "Signup failed. Try again.");
-    } else if (error.request) {
-      toast.error("No response from server. Please try again later.");
+    if (error) {
+      if (error.response) {
+        toast.error(error.response.data?.error || "Signup failed. Try again.");
+      } else if (error.request) {
+        toast.error("No response from server. Please try again later.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    } else if (res?.status === 201) {
+      toast.success(res.data?.message || "Signup successful! ✅");
+      setTimeout(() => {
+        window.location.href = "/verify-otp";
+      }, 2000);
     } else {
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("Signup failed. Try again.");
     }
-  } else if (res?.status === 201) {
-    toast.success(res.data?.message || "Signup successful! ✅");
-    setTimeout(() => {
-      window.location.href = "/verify-otp";
-    }, 2000);
-  } else {
-    toast.error("Signup failed. Try again.");
-  }
 
-  setLoading(false);
-  setFormData({ name: "", email: "", password: "" });
-  e.target.reset();
-};
-
+    setLoading(false);
+    setFormData({ name: "", email: "", password: "" });
+    e.target.reset();
+  };
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
