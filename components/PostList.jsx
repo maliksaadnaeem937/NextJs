@@ -7,6 +7,7 @@ import PostCard from "./PostCard";
 import Loading from "src/app/loading";
 import { Loader } from "lucide-react";
 import NavigationLink from "./NavigationLink";
+import ErrorMessage from "./ErrorMessage";
 
 export default function PostList({
   queryKey,
@@ -68,9 +69,7 @@ export default function PostList({
   }
   return (
     <div className="max-w-2xl mx-auto mt-10">
-      {status === "error" && (
-        <p className="text-center text-red-500">Failed to load posts.</p>
-      )}
+      {status === "error" && <ErrorMessage message={"Failed to Load Posts"} />}
 
       {data?.pages.map((page, i) => (
         <div key={i}>
@@ -93,7 +92,7 @@ export default function PostList({
         </p>
       )}
       {!hasNextPage && (
-        <p className="flex justify-center items-center mt-2 text-xl ">
+        <p className="flex justify-center items-center mt-2 text-md ">
           No More Data
         </p>
       )}

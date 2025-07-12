@@ -7,7 +7,6 @@ export default async function page() {
   if (!currentUserId) {
     return redirect("/login");
   }
-
   return (
     <ProfilePage
       key={"profile"}

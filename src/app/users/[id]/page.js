@@ -1,6 +1,7 @@
 import ProfilePage from "@components/ProfilePage";
 import { anyValidToken } from "@lib/auth";
 import { redirect } from "next/navigation";
+export const dynamic = "force-dynamic";
 
 export default async function page({ params }) {
   const { id } = await params;
@@ -23,3 +24,8 @@ export default async function page({ params }) {
     />
   );
 }
+
+export const metadata = {
+  title: "User Profile",
+  description: "View User Profile",
+};

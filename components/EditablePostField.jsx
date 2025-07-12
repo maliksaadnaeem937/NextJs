@@ -29,7 +29,7 @@ export default function EditablePostField({
       {!editing && editable && (
         <button
           onClick={() => setEditing(true)}
-          className="absolute top-0 right-0 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition"
+          className="absolute top-0 right-0 text-gray-900 opacity-100 hover:text-blue-600 transition"
           title={`Edit ${label}`}
         >
           <Pencil size={16} />

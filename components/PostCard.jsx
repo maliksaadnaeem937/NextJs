@@ -13,8 +13,7 @@ import { profileImageUrl } from "@lib/globalVariables";
 import Link from "next/link";
 
 export default function PostCard({ post, editable = true, currentUserId }) {
-  console.log(post);
-
+  const [postData, setPostData] = useState(post || {});
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments || []);
@@ -24,7 +23,11 @@ export default function PostCard({ post, editable = true, currentUserId }) {
   const profileLink =
     currentUserId === post.user?._id ? "/profile" : `/users/${post.user?._id}`;
 
-  const edited = post.createdAt !== post.updatedAt;
+  const edited =
+    post.createdAt &&
+    post.updatedAt &&
+    new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime();
+
   const handleCommentSubmit = async (text) => {
     const newComment = {
       _id: Date.now(),
@@ -39,10 +42,20 @@ export default function PostCard({ post, editable = true, currentUserId }) {
   };
 
   const handleTitleUpdate = async (updatedTitle) => {
-    await handleEditTitle(post._id, updatedTitle);
+    const success = await handleEditTitle(post._id, updatedTitle);
+    if (success) {
+      setPostData((prev) => {
+        return { ...prev, title: updatedTitle };
+      });
+    }
   };
   const handleContentUpdate = async (updatedTitle) => {
-    await handleEditContent(post._id, updatedTitle);
+    const success = await handleEditContent(post._id, updatedTitle);
+    if (success) {
+      setPostData((prev) => {
+        return { ...prev, content: updatedTitle };
+      });
+    }
   };
 
   return (
@@ -74,13 +87,13 @@ export default function PostCard({ post, editable = true, currentUserId }) {
       <div className="mb-3">
         <EditablePostField
           label="Title"
-          value={post.title}
+          value={postData.title}
           onSave={handleTitleUpdate}
           editable={editable}
         />
         <EditablePostField
           label="Content"
-          value={post.content}
+          value={postData.content}
           onSave={handleContentUpdate}
           editable={editable}
         />

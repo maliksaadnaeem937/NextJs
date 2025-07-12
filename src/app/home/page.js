@@ -3,6 +3,7 @@ import PostList from "@components/PostList";
 import NavigationLink from "@components/NavigationLink";
 import { redirect } from "next/navigation";
 import { anyValidToken } from "@lib/auth";
+export const dynamic = "force-dynamic";
 
 export default async function page() {
   if (!(await anyValidToken())) {
@@ -25,3 +26,8 @@ export default async function page() {
     </div>
   );
 }
+
+export const metadata = {
+  title: "Home",
+  description: "View Posts",
+};

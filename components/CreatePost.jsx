@@ -21,7 +21,7 @@ export default function CreatePostForm() {
       setLoading(false);
       setContent("");
       setTitle("");
-      router.refresh();
+      router.replace("/home");
     }
   };
 
