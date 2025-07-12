@@ -10,7 +10,12 @@ import CreatePostForm from "./CreatePost";
 import NavigationLink from "./NavigationLink.jsx";
 import PostList from "./PostList";
 
-export default function ProfilePageUI({ user, editable }) {
+export default function ProfilePageUI({
+  user,
+  editable,
+  getPostsPath,
+  currentUserId,
+}) {
   const router = useRouter();
   const [bio, setBio] = useState(user?.bio || "No Bio Yet!");
   const [techStack, setTechStack] = useState(
@@ -160,13 +165,14 @@ export default function ProfilePageUI({ user, editable }) {
           </div>
         </>
       )}
-      {editable && user?._id && (
-        <PostList
-          queryKey="get-my-posts"
-          method="get"
-          path="/protected/get-my-posts"
-        />
-      )}
+
+      <PostList
+        queryKey="get-my-posts"
+        method="get"
+        path={getPostsPath}
+        currentUserId={currentUserId}
+        editable={editable}
+      />
     </div>
   );
 }

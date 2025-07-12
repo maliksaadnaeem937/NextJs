@@ -1,8 +1,16 @@
 import ProfilePage from "@components/ProfilePage";
+import { anyValidToken } from "@lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function page({ params }) {
-  // ✅ Correct way: await params directly in function signature destructuring
   const { id } = await params;
+  const currentUserId = await anyValidToken();
+  if (!currentUserId) {
+    return redirect("/login");
+  }
+  if (currentUserId === id) {
+    return redirect("/profile");
+  }
 
   return (
     <ProfilePage
@@ -10,6 +18,8 @@ export default async function page({ params }) {
       method="get"
       path={`/protected/user-profile/${id}`}
       editable={false}
+      getPostsPath={`/protected/posts/${id}`}
+      currentUserId={currentUserId}
     />
   );
 }

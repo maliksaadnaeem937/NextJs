@@ -1,7 +1,13 @@
 import React from "react";
 import PostList from "@components/PostList";
 import NavigationLink from "@components/NavigationLink";
-export default function page() {
+import { redirect } from "next/navigation";
+import { anyValidToken } from "@lib/auth";
+
+export default async function page() {
+  if (!(await anyValidToken())) {
+    return redirect("/login");
+  }
   return (
     <div>
       <div className="max-w-2xl text-center mx-auto pb-2">

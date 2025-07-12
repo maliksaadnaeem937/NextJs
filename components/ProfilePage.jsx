@@ -5,8 +5,14 @@ import Loading from "src/app/loading";
 import { makeAPICall } from "@lib/makeAPICall";
 import ErrorMessage from "./ErrorMessage";
 import ProfilePageUI from "./ProfilePageUI";
-export default function ProfilePage({ key, method, path, editable }) {
-  console.log("hi");
+export default function ProfilePage({
+  key,
+  method,
+  path,
+  editable,
+  getPostsPath,
+  currentUserId,
+}) {
   const {
     data: user,
     error,
@@ -25,6 +31,13 @@ export default function ProfilePage({ key, method, path, editable }) {
       ></ErrorMessage>
     );
   } else {
-    return <ProfilePageUI user={user} editable={editable} />;
+    return (
+      <ProfilePageUI
+        user={user}
+        editable={editable}
+        getPostsPath={getPostsPath}
+        currentUserId={currentUserId}
+      />
+    );
   }
 }

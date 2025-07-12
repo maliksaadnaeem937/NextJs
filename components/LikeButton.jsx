@@ -3,15 +3,20 @@
 "use client";
 import { useState } from "react";
 import { Heart } from "lucide-react";
+import { handleLikePost } from "@lib/handlePostOperations";
+import { useRouter } from "next/navigation";
+export default function LikeButton({ postId, initialLikes, isLikedByMe }) {
+  const router = useRouter();
+  const [likes, setLikes] = useState(initialLikes);
+  const [liked, setLiked] = useState(isLikedByMe);
 
-export default function LikeButton({ postId, initialLikes = [] }) {
-  const [likes, setLikes] = useState(initialLikes.length);
-  const [liked, setLiked] = useState(false); 
-
-  const handleLike = () => {
-    // 👇 Add actual API request logic here
+  const handleLike = async () => {
     setLiked(!liked);
     setLikes((prev) => (liked ? prev - 1 : prev + 1));
+    const success = await handleLikePost(postId);
+    if (success) {
+      router.refresh();
+    }
   };
 
   return (

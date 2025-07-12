@@ -127,28 +127,68 @@ export async function PATCH(req) {
 export async function GET(req) {
   try {
     await connectDB();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(token, ACCESS_SECRET);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
+    const currentUserId = payload.id;
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "5");
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
-      .sort({ createdAt: -1 }) // newest first
+    const posts = await Post.find({ user: { $ne: currentUserId } }) // 👈 exclude own posts
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("user", "name profilePic") // just show name and avatar
-      .select("title content user likes createdAt updatedAt"); // send required fields
+      .populate("user", "name profilePic")
+      .select("title content user likes createdAt updatedAt");
 
-    const totalPosts = await Post.countDocuments();
+    // Transform posts to add isLikedByMe and likeCount
+    const postsWithLikeStatus = posts.map((post) => {
+      const isLikedByMe = post.likes.some(
+        (id) => id.toString() === currentUserId
+      );
 
-    return Response.json({
-      posts,
+      const postObj = post.toObject();
+      delete postObj.likes;
+
+      return {
+        ...postObj,
+        isLikedByMe,
+        likeCount: post.likes.length,
+      };
+    });
+
+    const totalPosts = await Post.countDocuments({
+      user: { $ne: currentUserId },
+    });
+
+    return NextResponse.json({
+      posts: postsWithLikeStatus,
       totalPages: Math.ceil(totalPosts / limit),
       currentPage: page,
     });
   } catch (err) {
-    return Response.json({ error: "Failed to fetch posts" }, { status: 500 });
+    console.error("Fetch posts error:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch posts" },
+      { status: 500 }
+    );
   }
 }
 

@@ -1,14 +1,12 @@
-// /app/api/posts/route.js
-
 import { connectDB } from "@lib/mongodb";
 import Post from "@models/Post";
-import User from "@models/User";
 import jwt from "jsonwebtoken";
-import { JWT_ACCESS_SECRET } from "@lib/globalVariables"; // ✅ Make sure this is defined
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export async function GET(req) {
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+
+export async function GET(req, { params }) {
   try {
     await connectDB();
 
@@ -16,38 +14,34 @@ export async function GET(req) {
     const token = cookieStore.get("accessToken")?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized: No token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let user;
+    let payload;
     try {
-      user = jwt.verify(token, JWT_ACCESS_SECRET);
+      payload = jwt.verify(token, ACCESS_SECRET);
     } catch (err) {
       return NextResponse.json(
-        { error: "Unauthorized: Invalid or expired token" },
+        { error: "Invalid or expired token" },
         { status: 401 }
       );
     }
 
-    const currentUserId = user.id;
+    const currentUserId = payload.id;
+    const { id } = await params;
+    const targetUserId = id;
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "5");
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find({ user: user.id })
+    const posts = await Post.find({ user: targetUserId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate({
-        path: "user",
-        select: "name profilePic",
-      })
-      .select("title content createdAt user likes updatedAt");
+      .populate("user", "name profilePic")
+      .select("title content user likes createdAt updatedAt");
 
     const postsWithLikeStatus = posts.map((post) => {
       const isLikedByMe = post.likes.some(
@@ -64,7 +58,7 @@ export async function GET(req) {
       };
     });
 
-    const totalPosts = await Post.countDocuments({ user: user.id });
+    const totalPosts = await Post.countDocuments({ user: targetUserId });
 
     return NextResponse.json({
       posts: postsWithLikeStatus,
@@ -72,8 +66,9 @@ export async function GET(req) {
       currentPage: page,
     });
   } catch (err) {
+    console.error("Fetch user posts error:", err);
     return NextResponse.json(
-      { error: "Failed to fetch posts" },
+      { error: "Failed to fetch user posts" },
       { status: 500 }
     );
   }

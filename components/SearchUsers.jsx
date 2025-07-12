@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@lib/axios";
 import debounce from "lodash.debounce";
 import Link from "next/link";
-
+import { profileImageUrl } from "@lib/globalVariables";
 export default function SearchUsers() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -69,7 +69,7 @@ export default function SearchUsers() {
                     className="flex items-center gap-4 p-3 border-b hover:bg-gray-50 rounded-md transition"
                   >
                     <img
-                      src={user.profilePic || "/default-avatar.png"}
+                      src={user.profilePic || profileImageUrl}
                       alt="Avatar"
                       className="w-10 h-10 rounded-full object-cover"
                     />

@@ -8,7 +8,13 @@ import Loading from "src/app/loading";
 import { Loader } from "lucide-react";
 import NavigationLink from "./NavigationLink";
 
-export default function PostList({ queryKey, method, path, editable }) {
+export default function PostList({
+  queryKey,
+  method,
+  path,
+  editable,
+  currentUserId,
+}) {
   const LIMIT = 5;
   const observerRef = useRef(null);
 
@@ -69,7 +75,12 @@ export default function PostList({ queryKey, method, path, editable }) {
       {data?.pages.map((page, i) => (
         <div key={i}>
           {page?.posts?.map((post) => (
-            <PostCard key={post._id} post={post} editable={editable} />
+            <PostCard
+              key={post._id}
+              post={post}
+              editable={editable}
+              currentUserId={currentUserId}
+            />
           ))}
         </div>
       ))}
