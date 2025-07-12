@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import User from "@models/User";
 import { connectDB } from "@lib/mongodb";
-import { JWT_ACCESS_SECRET } from "@lib/globalVariables";
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
 export async function GET() {

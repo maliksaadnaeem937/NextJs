@@ -2,7 +2,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "src/app/loading";
-import { fetchData } from "@lib/fetchData";
+import { makeAPICall } from "@lib/makeAPICall";
 import ErrorMessage from "./ErrorMessage";
 import ProfilePageUI from "./ProfilePageUI";
 export default function ProfilePage({ key, method, path, editable }) {
@@ -13,7 +13,7 @@ export default function ProfilePage({ key, method, path, editable }) {
     isLoading,
   } = useQuery({
     queryKey: [key, method, path],
-    queryFn: fetchData,
+    queryFn: makeAPICall,
     retry: false,
   });
 
@@ -25,7 +25,6 @@ export default function ProfilePage({ key, method, path, editable }) {
       ></ErrorMessage>
     );
   } else {
-    console.log("inside profile page", user);
     return <ProfilePageUI user={user} editable={editable} />;
   }
 }

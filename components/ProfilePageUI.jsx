@@ -6,6 +6,9 @@ import LogoutButton from "./LogoutButton";
 import { updateProfile } from "@lib/handleProfileUpdate";
 import { profileImageUrl } from "@lib/globalVariables";
 import SearchUsers from "./SearchUsers";
+import CreatePostForm from "./CreatePost";
+import NavigationLink from "./NavigationLink.jsx";
+import PostList from "./PostList";
 
 export default function ProfilePageUI({ user, editable }) {
   const router = useRouter();
@@ -15,7 +18,9 @@ export default function ProfilePageUI({ user, editable }) {
       ? user.techStack.join(", ")
       : "Nothing Added Yet!"
   );
+  const [showPostModal, setShowPostModal] = useState(false);
 
+  const toggleModal = () => setShowPostModal((prev) => !prev);
   const [profileImage, setProfileImage] = useState(
     user?.profilePic || profileImageUrl
   );
@@ -56,7 +61,7 @@ export default function ProfilePageUI({ user, editable }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
+    <div className="max-w-4xl  mx-auto mt-10 md:p-6 p-1 bg-white rounded-2xl shadow-xl border border-gray-200">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-start items-center gap-6">
         {/* Profile Image */}
@@ -109,8 +114,39 @@ export default function ProfilePageUI({ user, editable }) {
 
       {/* Divider */}
       <div className="my-6 border-t border-gray-200 border-2" />
+      <NavigationLink text={"View All Posts"} path={"/home"}></NavigationLink>
 
       {/* Conditionally render SearchUsers & LogoutButton */}
+      {editable && (
+        <>
+          {/* Create Post Button */}
+          <div className="mt-6 flex justify-center mb-2">
+            <button
+              onClick={toggleModal}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2 rounded-full font-semibold shadow-lg transition-all"
+            >
+              ✍️ Create Post
+            </button>
+          </div>
+          {/* Modal for CreatePostForm */}
+          {showPostModal && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full relative p-6">
+                {/* Close button */}
+                <button
+                  onClick={toggleModal}
+                  className="absolute top-3 right-4 text-gray-600 hover:text-red-500 text-xl font-bold"
+                >
+                  &times;
+                </button>
+
+                {/* Render the Form Component */}
+                <CreatePostForm onSuccess={toggleModal} />
+              </div>
+            </div>
+          )}
+        </>
+      )}
       {editable && (
         <>
           <div className="flex justify-center sm:justify-end">
@@ -123,6 +159,13 @@ export default function ProfilePageUI({ user, editable }) {
             <LogoutButton />
           </div>
         </>
+      )}
+      {editable && user?._id && (
+        <PostList
+          queryKey="get-my-posts"
+          method="get"
+          path="/protected/get-my-posts"
+        />
       )}
     </div>
   );
