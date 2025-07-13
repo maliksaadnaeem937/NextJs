@@ -26,7 +26,8 @@ export default function DeletePostButton({ postId }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-700 border border-red-500 rounded-full hover:bg-red-50 disabled:opacity-60 transition cursor-pointer"
+      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-700 border border-red-500 rounded-full hover:bg-red-50 disabled:opacity-60 transition cursor-pointer 
+      absolute top-0 right-0 m-2"
     >
       {loading ? (
         <Loader2 size={16} className="animate-spin" />

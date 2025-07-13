@@ -5,14 +5,15 @@ import LikeButton from "./LikeButton";
 import CommentButton from "./CommentButton";
 import CommentBox from "./CommentBox";
 import ViewCommentsButton from "./ViewCommentsButton";
-import CommentsList from "./CommentsList";
 import EditablePostField from "./EditablePostField";
 import { handleEditTitle, handleEditContent } from "@lib/handlePostOperations";
 import DeletePostButton from "./DeletePostButton";
 import { profileImageUrl } from "@lib/globalVariables";
 import Link from "next/link";
-
+import CommentList from "./CommentList";
+import { handleCommentSubmit } from "@lib/CommentOperations";
 export default function PostCard({ post, editable = true, currentUserId }) {
+  console.log(post);
   const [postData, setPostData] = useState(post || {});
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -28,17 +29,18 @@ export default function PostCard({ post, editable = true, currentUserId }) {
     post.updatedAt &&
     new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime();
 
-  const handleCommentSubmit = async (text) => {
-    const newComment = {
-      _id: Date.now(),
-      text,
-      user: {
-        name: "You",
-        profilePic: post.user?.profilePic || profileImageUrl,
-      },
-    };
-    setComments((prev) => [...prev, newComment]);
-    setShowComments(true);
+  const onSubmitComment = async (text) => {
+    const newComment = await handleCommentSubmit(post._id, text);
+    if (newComment) {
+      setComments((prev) => [newComment, ...prev]);
+      setShowComments(true);
+    }
+  };
+  const onSubmitReply = async (parentId, text) => {
+    const newReply = await handleCommentSubmit(post._id, text, parentId);
+    if (newReply) {
+      // Optional: update UI, reply count, etc.
+    }
   };
 
   const handleTitleUpdate = async (updatedTitle) => {
@@ -59,8 +61,9 @@ export default function PostCard({ post, editable = true, currentUserId }) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6 mb-6 border border-gray-200 transition hover:shadow-lg">
+    <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6 mb-6 relative border border-gray-200 transition hover:shadow-lg">
       {/* Header */}
+       {editable && <DeletePostButton postId={post._id} />}
       <div className="flex items-center gap-4 mb-4">
         <Link href={profileLink}>
           <img
@@ -109,20 +112,24 @@ export default function PostCard({ post, editable = true, currentUserId }) {
           />
           <CommentButton onClick={() => setShowCommentInput((prev) => !prev)} />
           <ViewCommentsButton onClick={toggleComments} isOpen={showComments} />
-          {editable && <DeletePostButton postId={post._id} />}
+         
         </div>
       </div>
       {/* Comment Input */}
       {showCommentInput && (
         <div className="mt-4 bg-gray-50 p-4 rounded-xl border">
-          <CommentBox onSubmit={handleCommentSubmit} />
+          <CommentBox postId={post._id} />
         </div>
       )}
 
-      {/* Comments List */}
       {showComments && (
         <div className="mt-4">
-          <CommentsList comments={comments} />
+          <CommentList
+            postId={post._id}
+            path="/protected/comments"
+            queryKey="get-comments"
+            method="get"
+          />
         </div>
       )}
     </div>

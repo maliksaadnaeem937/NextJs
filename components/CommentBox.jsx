@@ -1,31 +1,34 @@
+// components/CommentBox.jsx
 "use client";
 import { useState } from "react";
 import { SendHorizonal } from "lucide-react";
+import { handleCommentSubmit } from "@lib/CommentOperations";
 
-export default function CommentBox({ onSubmit, loading = false }) {
+export default function CommentBox({ postId }) {
   const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-    await onSubmit(comment.trim());
+    console.log("submitting");
+    setLoading(true);
+    const success = await handleCommentSubmit(postId, comment);
     setComment("");
+    setLoading(false);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white gap-2"
-    >
+    <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white gap-2 mt-2">
       <input
         type="text"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         className="flex-1 outline-none text-sm placeholder-gray-400"
-        placeholder="Write a comment..."
+        placeholder="Write a comment"
         disabled={loading}
+        autoFocus={true}
       />
       <button
+        onClick={handleSubmit}
         type="submit"
         disabled={loading || !comment.trim()}
         className="text-blue-600 hover:text-blue-800 transition disabled:opacity-50"
@@ -33,6 +36,6 @@ export default function CommentBox({ onSubmit, loading = false }) {
       >
         <SendHorizonal size={18} />
       </button>
-    </form>
+    </div>
   );
 }
