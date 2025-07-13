@@ -6,7 +6,14 @@ import CommentItem from "./CommentItem";
 import ErrorMessage from "./ErrorMessage";
 import { Loader } from "lucide-react";
 
-export default function CommentList({ postId, queryKey, method, path }) {
+export default function CommentList({
+  postId,
+  queryKey,
+  method,
+  path,
+  editable,
+  currentUserId,
+}) {
   const LIMIT = 5;
 
   const {
@@ -54,7 +61,11 @@ export default function CommentList({ postId, queryKey, method, path }) {
       {data?.pages.map((page, i) => (
         <div key={i}>
           {page?.map((comment) => (
-            <CommentItem key={comment._id} comment={comment} />
+            <CommentItem
+              key={comment._id}
+              comment={comment}
+              currentUserId={currentUserId}
+            />
           ))}
         </div>
       ))}
@@ -69,7 +80,7 @@ export default function CommentList({ postId, queryKey, method, path }) {
           </button>
         </div>
       )}
-      {!hasNextPage && data?.pages.flat().length > 0 && (
+      {!hasNextPage && (
         <p className="text-center text-sm text-gray-500">No more comments</p>
       )}
     </div>

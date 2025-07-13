@@ -6,7 +6,8 @@ import { anyValidToken } from "@lib/auth";
 export const dynamic = "force-dynamic";
 
 export default async function page() {
-  if (!(await anyValidToken())) {
+  const currentUserId = await anyValidToken();
+  if (!currentUserId) {
     return redirect("/login");
   }
   return (
@@ -22,6 +23,7 @@ export default async function page() {
         method={"get"}
         path={"/protected/posts"}
         editable={false}
+        currentUserId={currentUserId}
       ></PostList>
     </div>
   );

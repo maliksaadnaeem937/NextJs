@@ -3,16 +3,22 @@
 import { useState } from "react";
 import { SendHorizonal } from "lucide-react";
 import { handleCommentSubmit } from "@lib/CommentOperations";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CommentBox({ postId }) {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const queryClient = useQueryClient();
   const handleSubmit = async (e) => {
     console.log("submitting");
     setLoading(true);
-    const success = await handleCommentSubmit(postId, comment);
-    setComment("");
+    if (await handleCommentSubmit(postId, comment)) {
+      setComment("");
+      queryClient.invalidateQueries({
+        queryKey: ["get-comments"],
+      });
+    }
+
     setLoading(false);
   };
 

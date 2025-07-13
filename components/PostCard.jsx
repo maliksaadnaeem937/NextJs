@@ -129,6 +129,8 @@ export default function PostCard({ post, editable = true, currentUserId }) {
             path="/protected/comments"
             queryKey="get-comments"
             method="get"
+            editable={editable}
+            currentUserId={currentUserId}
           />
         </div>
       )}

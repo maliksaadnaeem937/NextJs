@@ -4,9 +4,10 @@ import { Trash2, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { handleDeletePost } from "@lib/handlePostOperations";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function DeletePostButton({ postId }) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async (e) => {
@@ -14,7 +15,9 @@ export default function DeletePostButton({ postId }) {
       setLoading(true);
       const success = await handleDeletePost(postId);
       if (success) {
-        router.refresh();
+        queryClient.invalidateQueries({
+          queryKey: ["get-my-posts"],
+        });
       }
     } catch (e) {
     } finally {

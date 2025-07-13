@@ -3,6 +3,7 @@ import { connectDB } from "@lib/mongodb";
 import Comment from "@models/Comment";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
 export async function GET(req, { params }) {
   try {
@@ -33,8 +34,6 @@ export async function GET(req, { params }) {
 }
 
 export async function POST(req, { params }) {
-  const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
-
   console.log("req recieved on post comment", ACCESS_SECRET);
   try {
     await connectDB();
@@ -89,6 +88,126 @@ export async function POST(req, { params }) {
     );
   } catch (err) {
     console.error("Error creating comment:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req, { params }) {
+  try {
+    await connectDB();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
+
+    if (!token) {
+      console.log("No token is present");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let payload;
+    try {
+      console.log("token present ", token);
+      payload = jwt.verify(token, ACCESS_SECRET);
+    } catch (err) {
+      console.log("error occued in verification");
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
+    const { postId: commentId } = await params;
+    if (!commentId) {
+      return NextResponse.json(
+        { error: "Comment ID is required." },
+        { status: 400 }
+      );
+    }
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return NextResponse.json(
+        { error: "Comment not found." },
+        { status: 404 }
+      );
+    }
+
+    if (comment.user.toString() !== payload.id) {
+      return NextResponse.json(
+        { error: "Forbidden: You cannot delete this comment." },
+        { status: 403 }
+      );
+    }
+
+    await Comment.findByIdAndDelete(commentId);
+
+    return NextResponse.json(
+      { message: "Post deleted successfully." },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("Error deleting comment:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req, { params }) {
+  try {
+    console.log("req recived for editing comment");
+    const { text } = await req.json();
+    if (!text) {
+      return NextResponse.json({ error: "Text is required." }, { status: 400 });
+    }
+    await connectDB();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
+
+    if (!token) {
+      console.log("No token is present");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let payload;
+    try {
+      console.log("token present ", token);
+      payload = jwt.verify(token, ACCESS_SECRET);
+    } catch (err) {
+      console.log("error occued in verification");
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+    const { postId: commentId } = await params;
+
+    if (!commentId) {
+      return NextResponse.json(
+        { error: "Comment ID is required." },
+        { status: 400 }
+      );
+    }
+    await Comment.findByIdAndUpdate(commentId, { text });
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return NextResponse.json(
+        { error: "Comment not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Post deleted successfully." },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("Error deleting comment:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

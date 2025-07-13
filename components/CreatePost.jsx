@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import EditPostButton from "./EditPostButton";
 import { handleCreatePost } from "@lib/handlePostOperations";
 import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CreatePostForm() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -14,15 +16,14 @@ export default function CreatePostForm() {
   const onCreatePost = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await handleCreatePost(title, content);
-    } catch (e) {
-    } finally {
-      setLoading(false);
+
+    if (await handleCreatePost(title, content)) {
       setContent("");
       setTitle("");
-      router.replace("/home");
+      queryClient.invalidateQueries({ queryKey: ["get-my-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["get-all-posts"] });
     }
+    setLoading(false);
   };
 
   return (
