@@ -20,11 +20,7 @@ export default function SignupPage() {
 
   const validateForm = () => {
     const { name, email, password } = formData;
-    if (email === "zoyayasir58@gmail.com") {
-     
-       toast.error("Something Went Wrong");
-        return false ;
-    }
+  
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passRegex =
